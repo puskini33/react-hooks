@@ -11,31 +11,30 @@ import {
 import { useEffect, useState } from 'react'
 
 function PokemonInfo({ pokemonName }) {
-  const [fetchedPokemonDetails, setFetchedPokemonDetails] = useState(false)
-  const [error, setError] = useState(false)
-  const [status, setStatus] = useState('idle')
+  const [status, setStatus] = useState({ progress: 'idle' })
 
   useEffect(() => {
     if (pokemonName) {
       const abortController = new AbortController()
 
-      setStatus('pending')
+      setStatus({ progress: 'pending' })
       fetchPokemon(pokemonName, abortController.signal)
         .then((response) => {
           if (!abortController.signal.aborted) {
-            setFetchedPokemonDetails({
-              name: response.name,
-              image: response.image,
-              number: response.number,
-              attacks: response.attacks,
-              fetchedAt: response.fetchedAt,
+            setStatus({
+              progress: 'resolved',
+              fetchedPokemonDetails: {
+                name: response.name,
+                image: response.image,
+                number: response.number,
+                attacks: response.attacks,
+                fetchedAt: response.fetchedAt,
+              },
             })
-            setStatus('resolved')
           }
         })
         .catch((error) => {
-          setError(error)
-          setStatus('rejected')
+          setStatus({ progress: 'rejected', error: error })
         })
 
       return () => abortController.abort()
@@ -44,19 +43,19 @@ function PokemonInfo({ pokemonName }) {
 
   let content
 
-  if (status === 'rejected') {
+  if (status.progress === 'rejected') {
     content = (
       <div role="alert">
         There was an error:{' '}
-        <pre style={{ whiteSpace: 'normal' }}>{error.message}</pre>
+        <pre style={{ whiteSpace: 'normal' }}>{status.error.message}</pre>
       </div>
     )
-  } else if (status === 'idle') {
+  } else if (status.progress === 'idle') {
     content = 'Submit a pokemon'
-  } else if (status === 'pending') {
+  } else if (status.progress === 'pending') {
     content = <PokemonInfoFallback />
   } else {
-    content = <PokemonDataView pokemon={fetchedPokemonDetails} />
+    content = <PokemonDataView pokemon={status.fetchedPokemonDetails} />
   }
 
   return content
