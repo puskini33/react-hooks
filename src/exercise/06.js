@@ -2,11 +2,16 @@
 // http://localhost:3000/isolated/exercise/06.js
 
 import * as React from 'react'
-import { fetchPokemon, PokemonForm } from '../pokemon'
+import {
+  fetchPokemon,
+  PokemonForm,
+  PokemonInfoFallback,
+  PokemonDataView,
+} from '../pokemon'
 import { useEffect, useState } from 'react'
 
 function PokemonInfo({ pokemonName }) {
-  const [selectedPokemonDetails, setSelectedPokemonDetails] = useState({})
+  const [fetchedPokemonDetails, setFetchedPokemonDetails] = useState(false)
 
   useEffect(() => {
     if (pokemonName) {
@@ -14,7 +19,7 @@ function PokemonInfo({ pokemonName }) {
 
       fetchPokemon(pokemonName, abortController.signal).then((response) => {
         if (!abortController.signal.aborted)
-          setSelectedPokemonDetails({
+          setFetchedPokemonDetails({
             name: response.name,
             image: response.image,
             number: response.number,
@@ -26,35 +31,13 @@ function PokemonInfo({ pokemonName }) {
       return () => abortController.abort()
     }
   }, [pokemonName])
-  return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-      }}>
-      <div style={{ alignSelf: 'end' }}>
-        <strong>
-          <time>{selectedPokemonDetails.fetchedAt}</time>
-        </strong>
-      </div>
-      <div style={{ marginTop: '20px' }}>
-        <img
-          src={selectedPokemonDetails.image}
-          alt={selectedPokemonDetails.name}></img>
-      </div>
-      <p style={{ textTransform: 'uppercase', fontFamily: 'Georgia' }}>
-        {selectedPokemonDetails.name + ' ' + selectedPokemonDetails.number}
-      </p>
-      <ul>
-        {'attacks' in selectedPokemonDetails &&
-          selectedPokemonDetails.attacks.special.map(
-            ({ name, type, damage }) => (
-              <li key={name}>{name + ': ' + damage + ' (' + type + ')'}</li>
-            )
-          )}
-      </ul>
-    </div>
+  // fetchedPokemonDetails is after first setting always true
+  return !pokemonName ? (
+    'Submit a pokemon'
+  ) : !fetchedPokemonDetails ? (
+    <PokemonInfoFallback />
+  ) : (
+    <PokemonDataView pokemon={fetchedPokemonDetails} />
   )
 }
 
@@ -73,7 +56,7 @@ function App() {
       <PokemonForm pokemonName={pokemonName} onSubmit={handleSubmit} />
       <hr />
       <div className="pokemon-info">
-        <PokemonInfo pokemonName={pokemonName} />
+        <PokemonInfo pokemonName={pokemonName} key={pokemonName} />
       </div>
     </div>
   )
