@@ -12,33 +12,47 @@ import { useEffect, useState } from 'react'
 
 function PokemonInfo({ pokemonName }) {
   const [fetchedPokemonDetails, setFetchedPokemonDetails] = useState(false)
+  const [error, setError] = useState(false)
 
   useEffect(() => {
     if (pokemonName) {
       const abortController = new AbortController()
 
-      fetchPokemon(pokemonName, abortController.signal).then((response) => {
-        if (!abortController.signal.aborted)
-          setFetchedPokemonDetails({
-            name: response.name,
-            image: response.image,
-            number: response.number,
-            attacks: response.attacks,
-            fetchedAt: response.fetchedAt,
-          })
-      })
+      fetchPokemon(pokemonName, abortController.signal)
+        .then((response) => {
+          if (!abortController.signal.aborted)
+            setFetchedPokemonDetails({
+              name: response.name,
+              image: response.image,
+              number: response.number,
+              attacks: response.attacks,
+              fetchedAt: response.fetchedAt,
+            })
+        })
+        .catch((error) => setError(error))
 
       return () => abortController.abort()
     }
   }, [pokemonName])
-  // fetchedPokemonDetails is after first setting always true
-  return !pokemonName ? (
-    'Submit a pokemon'
-  ) : !fetchedPokemonDetails ? (
-    <PokemonInfoFallback />
-  ) : (
-    <PokemonDataView pokemon={fetchedPokemonDetails} />
-  )
+
+  let content
+
+  if (error) {
+    content = (
+      <div role="alert">
+        There was an error:{' '}
+        <pre style={{ whiteSpace: 'normal' }}>{error.message}</pre>
+      </div>
+    )
+  } else if (!pokemonName) {
+    content = 'Submit a pokemon'
+  } else if (!fetchedPokemonDetails) {
+    content = <PokemonInfoFallback />
+  } else {
+    content = <PokemonDataView pokemon={fetchedPokemonDetails} />
+  }
+
+  return content
 }
 
 function App() {
