@@ -9,9 +9,21 @@ import {
   PokemonDataView,
 } from '../pokemon'
 import { useEffect, useState } from 'react'
+import { ErrorBoundary } from './errorBoundary'
+
+function FallbackErrorMessage({ error }) {
+  return (
+    <div role="alert">
+      There was an error:{' '}
+      <pre style={{ whiteSpace: 'normal' }}>{error.message}</pre>
+    </div>
+  )
+}
 
 function PokemonInfo({ pokemonName }) {
+  // initializing state to false and not to {} because fetchedPokemonDetails would otherwise be true as an object
   const [fetchedPokemonDetails, setFetchedPokemonDetails] = useState(false)
+
   const [error, setError] = useState(false)
 
   useEffect(() => {
@@ -29,7 +41,9 @@ function PokemonInfo({ pokemonName }) {
               fetchedAt: response.fetchedAt,
             })
         })
-        .catch((error) => setError(error))
+        .catch((error) => {
+          setError(error)
+        })
 
       return () => abortController.abort()
     }
@@ -38,12 +52,7 @@ function PokemonInfo({ pokemonName }) {
   let content
 
   if (error) {
-    content = (
-      <div role="alert">
-        There was an error:{' '}
-        <pre style={{ whiteSpace: 'normal' }}>{error.message}</pre>
-      </div>
-    )
+    throw error
   } else if (!pokemonName) {
     content = 'Submit a pokemon'
   } else if (!fetchedPokemonDetails) {
@@ -70,7 +79,11 @@ function App() {
       <PokemonForm pokemonName={pokemonName} onSubmit={handleSubmit} />
       <hr />
       <div className="pokemon-info">
-        <PokemonInfo pokemonName={pokemonName} key={pokemonName} />
+        <ErrorBoundary
+          pokemonName={pokemonName}
+          FallbackMessage={FallbackErrorMessage}>
+          <PokemonInfo pokemonName={pokemonName} key={pokemonName} />
+        </ErrorBoundary>
       </div>
     </div>
   )
