@@ -2,19 +2,21 @@
 // http://localhost:3000/isolated/exercise/02.js
 
 import * as React from 'react'
-import {useEffect} from "react";
+import { useEffect, useState } from 'react'
 
-function Greeting({initialName = ''}) {
-  function getInitialNameValue() {
-    return window.localStorage.getItem('name') ?? initialName
-  }
-
-  const [name, setName] = React.useState(getInitialNameValue)
+function useLocalStorageState(key, defaultValue) {
+  const currentValue = () => window.localStorage.getItem(key) || defaultValue
+  const [state, setState] = useState(currentValue)
 
   useEffect(() => {
-    window.localStorage.setItem('name', name)
-  }
-  , [name])
+    window.localStorage.setItem(key, defaultValue)
+  }, [key, defaultValue])
+
+  return [state, setState]
+}
+
+function Greeting({ initialName = '' }) {
+  const [name, setName] = useLocalStorageState('name', initialName)
 
   function handleChange(event) {
     setName(event.target.value)
