@@ -3,7 +3,9 @@
 
 import * as React from 'react'
 
-function Name({ name, setName }) {
+function Name() {
+  const [name, setName] = React.useState('')
+
   return (
     <div>
       <label htmlFor="name">Name: </label>
@@ -28,24 +30,22 @@ function FavoriteAnimal({ animal, setAnimal }) {
   )
 }
 
-function Display({ name, animal }) {
+function Display({ animal }) {
   return (
     <div>{`
-    Hey ${name}, you are great! 
     Your favourite animal is the ${animal}.
     `}</div>
   )
 }
 
 function App() {
-  const [name, setName] = React.useState('')
   const [animal, setAnimal] = React.useState('')
 
   return (
     <form>
-      <Name name={name} setName={setName} />
+      <Name />
       <FavoriteAnimal animal={animal} setAnimal={setAnimal} />
-      <Display name={name} animal={animal} />
+      <Display animal={animal} />
     </form>
   )
 }
