@@ -5,12 +5,19 @@ import * as React from 'react'
 import { useEffect, useState } from 'react'
 
 function useLocalStorageState(key, defaultValue) {
-  const currentValue = () => window.localStorage.getItem(key) || defaultValue
-  const [state, setState] = useState(currentValue)
+  let deserialized
+  const valueInLocalStorage = window.localStorage.getItem(key)
+  if (valueInLocalStorage) {
+    deserialized = JSON.parse(valueInLocalStorage)
+  } else {
+    deserialized = defaultValue
+  }
+
+  const [state, setState] = useState(deserialized)
 
   useEffect(() => {
-    window.localStorage.setItem(key, defaultValue)
-  }, [key, defaultValue])
+    window.localStorage.setItem(key, JSON.stringify(state))
+  }, [key, state])
 
   return [state, setState]
 }
