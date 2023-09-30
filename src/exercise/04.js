@@ -3,17 +3,25 @@
 
 import { useState, useEffect } from 'react'
 
-const key = 'tic-tac-toe'
 const initialSquares = () => Array(9).fill(null)
 
-function Board() {
+function useLocalStorageState(key, defaultValue) {
   const [squares, setSquares] = useState(
-    () => JSON.parse(window.localStorage.getItem(key)) || initialSquares
+    () => JSON.parse(window.localStorage.getItem(key)) || defaultValue
   )
 
   useEffect(() => {
     window.localStorage.setItem(key, JSON.stringify(squares))
-  }, [squares])
+  }, [key, squares])
+
+  return [squares, setSquares]
+}
+
+function Board() {
+  const [squares, setSquares] = useLocalStorageState(
+    'tic-tac-toe',
+    initialSquares
+  )
 
   const nextValue = calculateNextValue(squares)
   const winner = calculateWinner(squares)
