@@ -72,7 +72,7 @@ https://micku7zu.github.io/vanilla-tilt.js/index.html
 
 .square:focus {
   outline: none;
-  background: #ddd;
+  background: rgba(236, 161, 76, 0.97);
 }
 
 .game {
