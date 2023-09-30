@@ -1,14 +1,31 @@
 // useState: tic tac toe
 // http://localhost:3000/isolated/exercise/04.js
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+
+const key = 'tic-tac-toe'
+const initialSquares = () => Array(9).fill(null)
 
 function Board() {
-  const initialSquares = () => Array(9).fill(null)
+  const [squares, setSquares] = useState(
+    () => JSON.parse(window.localStorage.getItem(key)) || initialSquares
+  )
 
-  const [squares, setSquares] = useState(initialSquares)
+  useEffect(() => {
+    window.localStorage.setItem(key, JSON.stringify(squares))
+  }, [squares])
 
-  function selectSquare(square) {}
+  const nextValue = calculateNextValue(squares)
+  const winner = calculateWinner(squares)
+  const gameStatus = calculateStatus(winner, squares, nextValue)
+
+  function selectSquare(i) {
+    if (winner || squares[i]) {
+      return
+    }
+    const newSquares = squares.toSpliced(i, 1, nextValue)
+    setSquares(newSquares)
+  }
 
   function restart() {
     setSquares(initialSquares)
@@ -24,7 +41,7 @@ function Board() {
 
   return (
     <div>
-      <div className="status">STATUS</div>
+      <div className="status">{gameStatus}</div>
       <div className="board-row">
         {renderSquare(0)}
         {renderSquare(1)}
