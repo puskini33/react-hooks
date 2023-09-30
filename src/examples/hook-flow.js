@@ -6,51 +6,55 @@
 // getting called in React 17:
 // https://github.com/kentcdodds/react-hooks/issues/90
 
+// Diagram is wrong: on Child Mount, the cleanup Effects of App are run first before running effects in child
 import * as React from 'react'
 
 function Child() {
   console.log('%c    Child: render start', 'color: MediumSpringGreen')
 
   const [count, setCount] = React.useState(() => {
-    console.log('%c    Child: useState(() => 0)', 'color: tomato')
+    console.log(
+      '%c  lazy initialization -  Child: useState(() => 0)',
+      'color: tomato'
+    )
     return 0
   })
 
   React.useEffect(() => {
-    console.log('%c    Child: useEffect(() => {})', 'color: LightCoral')
+    console.log('%c   1. Child: useEffect(() => {})', 'color: LightCoral')
     return () => {
       console.log(
-        '%c    Child: useEffect(() => {}) cleanup 🧹',
-        'color: LightCoral',
+        '%c  1.  Child: useEffect(() => {}) cleanup 🧹',
+        'color: LightCoral'
       )
     }
   })
 
   React.useEffect(() => {
     console.log(
-      '%c    Child: useEffect(() => {}, [])',
-      'color: MediumTurquoise',
+      '%c  2.  Child: useEffect(() => {}, [])',
+      'color: MediumTurquoise'
     )
     return () => {
       console.log(
-        '%c    Child: useEffect(() => {}, []) cleanup 🧹',
-        'color: MediumTurquoise',
+        '%c  2. Child: useEffect(() => {}, []) cleanup 🧹',
+        'color: MediumTurquoise'
       )
     }
   }, [])
 
   React.useEffect(() => {
-    console.log('%c    Child: useEffect(() => {}, [count])', 'color: HotPink')
+    console.log('%c  3.  Child: useEffect(() => {}, [count])', 'color: HotPink')
     return () => {
       console.log(
-        '%c    Child: useEffect(() => {}, [count]) cleanup 🧹',
-        'color: HotPink',
+        '%c  3.  Child: useEffect(() => {}, [count]) cleanup 🧹',
+        'color: HotPink'
       )
     }
   }, [count])
 
   const element = (
-    <button onClick={() => setCount(previousCount => previousCount + 1)}>
+    <button onClick={() => setCount((previousCount) => previousCount + 1)}>
       {count}
     </button>
   )
@@ -64,33 +68,39 @@ function App() {
   console.log('%cApp: render start', 'color: MediumSpringGreen')
 
   const [showChild, setShowChild] = React.useState(() => {
-    console.log('%cApp: useState(() => false)', 'color: tomato')
+    console.log(
+      '%cApp: run lazy initialization -> useState(() => false)',
+      'color: tomato'
+    )
     return false
   })
 
   React.useEffect(() => {
-    console.log('%cApp: useEffect(() => {})', 'color: LightCoral')
+    console.log('%cApp: 1. useEffect(() => {})', 'color: LightCoral')
     return () => {
-      console.log('%cApp: useEffect(() => {}) cleanup 🧹', 'color: LightCoral')
+      console.log(
+        '%cApp: 1. useEffect(() => {}) cleanup 🧹',
+        'color: LightCoral'
+      )
     }
   })
 
   React.useEffect(() => {
-    console.log('%cApp: useEffect(() => {}, [])', 'color: MediumTurquoise')
+    console.log('%cApp: 2. useEffect(() => {}, [])', 'color: MediumTurquoise')
     return () => {
       console.log(
-        '%cApp: useEffect(() => {}, []) cleanup 🧹',
-        'color: MediumTurquoise',
+        '%cApp: 2. useEffect(() => {}, []) cleanup 🧹',
+        'color: MediumTurquoise'
       )
     }
   }, [])
 
   React.useEffect(() => {
-    console.log('%cApp: useEffect(() => {}, [showChild])', 'color: HotPink')
+    console.log('%cApp: 3. useEffect(() => {}, [showChild])', 'color: HotPink')
     return () => {
       console.log(
-        '%cApp: useEffect(() => {}, [showChild]) cleanup 🧹',
-        'color: HotPink',
+        '%cApp: 3. useEffect(() => {}, [showChild]) cleanup 🧹',
+        'color: HotPink'
       )
     }
   }, [showChild])
@@ -101,7 +111,7 @@ function App() {
         <input
           type="checkbox"
           checked={showChild}
-          onChange={e => setShowChild(e.target.checked)}
+          onChange={(e) => setShowChild(e.target.checked)}
         />{' '}
         show child
       </label>
@@ -112,8 +122,7 @@ function App() {
           height: 50,
           width: 50,
           border: 'solid',
-        }}
-      >
+        }}>
         {showChild ? <Child /> : null}
       </div>
     </>
